@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: zerovm
+# Cookbook:: zerovm
 # Recipe:: source
 #
-# Copyright 2013, Heavy Water Operations, LLC
+# Copyright:: 2013, Heavy Water Operations, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 # limitations under the License.
 #
 
-include_recipe "build-essential"
-include_recipe "git"
+build_essential 'install compilation tools'
+include_recipe 'git'
 
 zerovm_env = {
-  "ZEROVM_ROOT" => "#{node[:zerovm][:root]}",
-  "ZRT_ROOT" => "#{node[:zerovm][:zrt_root]}",
-  "ZVM_PREFIX" => "#{node[:zerovm][:home]}",
+  'ZEROVM_ROOT' => "#{node['zerovm']['root']}",
+  'ZRT_ROOT' => "#{node['zerovm']['zrt_root']}",
+  'ZVM_PREFIX' => "#{node['zerovm']['home']}",
 }
 
-%w{
+%w(
   libc6-dev-i386
   libglib2.0-dev
   pkg-config
@@ -37,62 +37,62 @@ zerovm_env = {
   libtool
   g++-multilib
   texinfo
-}.each do |pkg|
+).each do |pkg|
   package pkg
 end
 
-git_sources = node[:zerovm][:sources]
-git node[:zerovm][:root] do
+git_sources = node['zerovm']['sources']
+git node['zerovm']['root'] do
   repository git_sources[:zerovm]
 end
 
-git "#{node[:zerovm][:root]}/valz" do
+git "#{node['zerovm']['root']}/valz" do
   repository git_sources[:validator]
 end
 
-git node[:zerovm][:zrt_root] do
+git node['zerovm']['zrt_root'] do
   repository git_sources[:zrt]
 end
 
-git node[:zerovm][:toolchain] do
+git node['zerovm']['toolchain'] do
   repository git_sources[:toolchain]
 end
 
-%w[linux-headers-for-nacl gcc glibc newlib binutils].each do |repo|
-  git "#{node[:zerovm][:toolchain]}/SRC/#{repo}" do
+%w(linux-headers-for-nacl gcc glibc newlib binutils).each do |repo|
+  git "#{node['zerovm']['toolchain']}/SRC/#{repo}" do
     repository git_sources[repo]
   end
 end
 
-directory zerovm_env["ZVM_PREFIX"]
+directory zerovm_env['ZVM_PREFIX']
 
-execute "build zerovm validator" do
-  cwd "#{node[:zerovm][:root]}/valz"
-  command "make validator"
+execute 'build zerovm validator' do
+  cwd "#{node['zerovm']['root']}/valz"
+  command 'make validator'
   environment zerovm_env
-  not_if { ::Dir.exists?(node[:zerovm][:root] + "/valz/out/Release") }
-  notifies :run, "execute[install zerovm validator]", :immediately
+  not_if { ::Dir.exist?(node['zerovm']['root'] + '/valz/out/Release') }
+  notifies :run, 'execute[install zerovm validator]', :immediately
 end
 
-execute "install zerovm validator" do
-  cwd "#{node[:zerovm][:root]}/valz"
-  command "make install"
+execute 'install zerovm validator' do
+  cwd "#{node['zerovm']['root']}/valz"
+  command 'make install'
   environment zerovm_env
-  not_if { ::File.exists? "/usr/bin/valz" }
+  not_if { ::File.exist? '/usr/bin/valz' }
   action :nothing
 end
 
-execute "install zerovm" do
-  cwd "#{node[:zerovm][:root]}"
-  command "make && make install PREFIX=#{zerovm_env["ZVM_PREFIX"]}"
+execute 'install zerovm' do
+  cwd "#{node['zerovm']['root']}"
+  command "make && make install PREFIX=#{zerovm_env['ZVM_PREFIX']}"
   environment zerovm_env
-  not_if { ::File.exists? "#{node[:zerovm][:home]}/bin/zerovm" }
+  not_if { ::File.exist? "#{node['zerovm']['home']}/bin/zerovm" }
 end
 
-execute "build zerovm toolchain" do
-  cwd node[:zerovm][:toolchain]
-  command "make -j8"
+execute 'build zerovm toolchain' do
+  cwd node['zerovm']['toolchain']
+  command 'make -j8'
   environment zerovm_env
 end
 
-include_recipe "zerovm::debugger" if node[:zerovm][:debugger]
+include_recipe 'zerovm::debugger' if node['zerovm']['debugger']
