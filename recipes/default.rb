@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: zerovm
+# Cookbook:: zerovm
 # Recipe:: default
 #
-# Copyright 2013, Heavy Water Operations, LLC
+# Copyright:: 2013, Heavy Water Operations, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-include_recipe "zerovm::source"
+include_recipe 'zerovm::source'
 
-file "/etc/profile.d/zerovm.sh" do
-  content "PATH=$PATH:#{node[:zerovm][:home]}/bin" + "\n"
+file '/etc/profile.d/zerovm.sh' do
+  content "PATH=$PATH:#{node['zerovm']['home']}/bin" + "\n"
 end
